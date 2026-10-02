@@ -1,0 +1,86 @@
+{
+ "receipt": {
+  "merchant": "OSTERIA LUME",
+  "date": "2026-09-27",
+  "currency": "USD",
+  "items": [
+   {
+    "id": "i1",
+    "name": "BURRATA",
+    "qty": 2,
+    "unit": 1600,
+    "total": 3200
+   },
+   {
+    "id": "i2",
+    "name": "FRITTO MISTO",
+    "qty": 1,
+    "unit": 1850,
+    "total": 1850
+   },
+   {
+    "id": "i3",
+    "name": "CACIO E PEPE",
+    "qty": 2,
+    "unit": 2200,
+    "total": 4400
+   },
+   {
+    "id": "i4",
+    "name": "RIGATONI VODKA",
+    "qty": 1,
+    "unit": 2400,
+    "total": 2400
+   },
+   {
+    "id": "i5",
+    "name": "BRANZINO",
+    "qty": 1,
+    "unit": 3400,
+    "total": 3400
+   },
+   {
+    "id": "i6",
+    "name": "TIRAMISU",
+    "qty": 1,
+    "unit": 1200,
+    "total": 1200
+   },
+   {
+    "id": "i7",
+    "name": "NEGRONI",
+    "qty": 2,
+    "unit": 1500,
+    "total": 3000
+   },
+   {
+    "id": "i8",
+    "name": "BTL MONTEPULCIANO",
+    "qty": 1,
+    "unit": 5800,
+    "total": 5800
+   },
+   {
+    "id": "i9",
+    "name": "ESPRESSO",
+    "qty": 3,
+    "unit": 450,
+    "total": 1350
+   }
+  ],
+  "subtotal": 26600,
+  "tax": 2361,
+  "taxIncluded": false,
+  "tip": 5320,
+  "service": 0,
+  "discount": 0,
+  "total": 34281,
+  "notes": []
+ },
+ "meta": {
+  "model": "gpt-5.4-mini",
+  "ms": 2592,
+  "inputTokens": 2351,
+  "outputTokens": 286
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "receipt": {
+  "merchant": "TANUKI RAMEN BAR",
+  "date": "2026-09-12",
+  "currency": "GBP",
+  "items": [
+   {
+    "id": "i1",
+    "name": "Tonkotsu ramen",
+    "qty": 2,
+    "unit": null,
+    "total": 2900
+   },
+   {
+    "id": "i2",
+    "name": "Spicy miso ramen",
+    "qty": 1,
+    "unit": 1500,
+    "total": 1500
+   },
+   {
+    "id": "i3",
+    "name": "Pork gyoza (6)",
+    "qty": 1,
+    "unit": 750,
+    "total": 750
+   },
+   {
+    "id": "i4",
+    "name": "Edamame, sea salt",
+    "qty": 1,
+    "unit": 495,
+    "total": 495
+   },
+   {
+    "id": "i5",
+    "name": "Chicken karaage",
+    "qty": 1,
+    "unit": 895,
+    "total": 895
+   },
+   {
+    "id": "i6",
+    "name": "Asahi 330ml",
+    "qty": 2,
+    "unit": null,
+    "total": 1160
+   },
+   {
+    "id": "i7",
+    "name": "Yuzu lemonade",
+    "qty": 1,
+    "unit": 450,
+    "total": 450
+   }
+  ],
+  "subtotal": 8150,
+  "tax": 1528,
+  "taxIncluded": true,
+  "tip": 0,
+  "service": 1019,
+  "discount": 0,
+  "total": 9169,
+  "notes": []
+ },
+ "meta": {
+  "model": "gpt-5.4-mini",
+  "ms": 2518,
+  "inputTokens": 2351,
+  "outputTokens": 251
+ }
+}

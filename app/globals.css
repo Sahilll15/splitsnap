@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  --color-page: #edf0f7;
+  --color-card: #ffffff;
+  --color-line: #e2e6f0;
+  --color-line-strong: #c9cfde;
+  --color-ink: #121833;
+  --color-ink-soft: #545d7e;
+  --color-ink-faint: #8a92ad;
+  --color-navy: #1b2a6b;
+  --color-navy-deep: #111b4d;
+  --color-navy-soft: #dfe5f7;
+  --color-navy-wash: #f3f5fc;
+  --color-paper: #fbfaf6;
+  --color-coral: #ff8a5c;
+  --color-good: #0d7a52;
+  --color-good-bg: #e0f4ea;
+  --color-warn: #9a5200;
+  --color-warn-bg: #fff1d9;
+  --color-bad: #b4232f;
+  --color-bad-bg: #fde7e9;
+
+  --font-sans: var(--font-ui), system-ui, sans-serif;
+  --font-mono: var(--font-num), ui-monospace, monospace;
+
+  --animate-rise: rise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pop: pop 0.3s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  --animate-scan: scan 1.8s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes pop {
+    from { transform: scale(0.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes scan {
+    0% { top: 4%; }
+    50% { top: 92%; }
+    100% { top: 4%; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--color-page);
+    color: var(--color-ink);
+  }
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible {
+    outline: 2.5px solid var(--color-coral);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+  input[type='number']::-webkit-inner-spin-button { -webkit-appearance: none; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  /* Torn paper edge, top and bottom, drawn with a mask so it works on any background. */
+  .torn {
+    --t: 16px;
+    -webkit-mask:
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / var(--t) 51% repeat-x,
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--t) 51% repeat-x;
+    mask:
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / var(--t) 51% repeat-x,
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--t) 51% repeat-x;
+  }
+  .dots { background-image: radial-gradient(rgba(255,255,255,.09) 1px, transparent 1px); background-size: 18px 18px; }
+  .skeleton {
+    background: linear-gradient(90deg, #e9ecf4 25%, #f6f7fb 50%, #e9ecf4 75%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+}
