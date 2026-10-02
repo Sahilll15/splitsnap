@@ -1,6 +1,14 @@
 # SplitSnap
 
-Split a restaurant bill from a photo of the receipt. Snap it at the table, check what was read, tap who had what, and send everyone an exact share that adds up to the cent. Built for groups who are tired of doing receipt maths on a phone calculator.
+Split a restaurant bill from a photo of the receipt, with shares that add up to the cent.
+
+**Live demo:** https://splitsnap-sandy.vercel.app
+
+![SplitSnap demo: opening the Osteria Lume sample receipt, checking the recognized items, assigning dishes to Ana, Ben, Chloe and Dev, then the settle screen showing each share of the $342.81 total and who pays whom](docs/demo.gif)
+
+## Why it exists
+
+Splitting a group bill usually means someone doing receipt maths on a phone calculator while the card machine waits, and the shares rarely add up to the total. SplitSnap reads the receipt from a photo, shows what it read and whether the numbers check out, lets you tap who had what, and sends everyone an exact share. It is built for groups paying at the table.
 
 ## How it works
 
@@ -24,6 +32,22 @@ All money is integers in the currency's minor unit (cents, pence, whole yen). Fl
 - Uploads are checked before anything is counted: content-length cap of 4MB, multipart only, magic-byte sniffing for JPEG, PNG and WebP. Only well-formed requests count against the rate limit.
 - In-memory rate limit per IP (4 scans per hour by default). The IP comes from `x-real-ip`, then the last `x-forwarded-for` entry, because the leftmost one is set by the client.
 - The SDK retries 429 and 5xx twice with backoff and times out after 60 seconds. `store: false` keeps receipts out of OpenAI's stored responses.
+
+## Screenshots
+
+![SplitSnap scan step with the headline "Split the bill before the card machine comes back", an upload area for the receipt photo, and three sample receipts below](docs/home.webp)
+
+![SplitSnap settle screen for the Osteria Lume sample: the receipt as read on the left with a $342.81 total, and on the right Ana $91.33 (paid), Ben $77.82, Chloe $110.66, Dev $63.00, plus who pays Ana](docs/result.webp)
+
+A 23 second recording of the full sample flow (scan, check, assign, settle) is in [docs/demo.mp4](docs/demo.mp4). Samples load a saved result from a real scan, so the recording made no API call.
+
+## Stack
+
+- Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4
+- OpenAI Node SDK: Responses API with image input and Structured Outputs (`gpt-5.4-mini`)
+- zod for the receipt schema
+- Integer money maths with BigInt for the largest remainder split, canvas for the share image
+- Deployed on Vercel
 
 ## Run it
 
@@ -53,3 +77,12 @@ npm run lint && npm run build
 - `lib/share.ts` URL encoding of a split
 - `app/api/scan/route.ts` upload checks, rate limit, vision call
 - `public/samples/` three sample receipt photos (rendered from HTML) and their saved scans
+
+## Related
+
+Other small apps built on the OpenAI API:
+
+- [Interview Coach](https://github.com/Sahilll15/interview-coach): a spoken mock interview with a report that quotes your answers. Live at https://interview-coach-seven-rose.vercel.app
+- [Minutes](https://github.com/Sahilll15/minutes): meeting minutes from diarized audio where every item links back to the transcript. Live at https://minutes-sand.vercel.app
+- [ShipNotes](https://github.com/Sahilll15/shipnotes): cited release notes from a GitHub compare range. Live at https://shipnotes-mu.vercel.app
+- [AskCSV](https://github.com/Sahilll15/askcsv): ask plain English questions about a CSV, answered with checked SQL in the browser
