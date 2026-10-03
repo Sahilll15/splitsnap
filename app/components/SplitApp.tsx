@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { downscale } from '../../lib/image.ts';
 import { reconcile } from '../../lib/receipt.ts';
@@ -10,6 +11,7 @@ import AssignStep from './AssignStep';
 import ReceiptPaper from './ReceiptPaper';
 import ReviewStep from './ReviewStep';
 import ScanStep from './ScanStep';
+import SiteFooter from './SiteFooter';
 import SettleStep from './SettleStep';
 import { initialState, reducer, type AppState, type Step } from './state';
 import { Icon } from './ui';
@@ -173,7 +175,7 @@ export default function SplitApp() {
             <h1 className="text-[26px] font-bold leading-tight tracking-tight sm:text-[34px]">
               {state.step === 'scan' ? (
                 <>
-                  <span className="sr-only">SplitSnap: </span>
+                  <span className="mb-2 block text-[13px] font-semibold uppercase tracking-[.12em] text-coral">SplitSnap, split a restaurant bill from a receipt photo</span>
                   Split the bill <span className="text-coral">before the card machine</span> comes back.
                 </>
               ) : (
@@ -183,7 +185,10 @@ export default function SplitApp() {
           </div>
           {state.step === 'scan' && (
             <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/75 sm:text-base">
-              Snap the receipt. Check what was read. Tap who had what. Everyone gets an exact share that adds up to the cent.
+              Snap the receipt. Check what was read. Tap who had what. Everyone gets an exact share that adds up to the cent.{' '}
+              <Link href="/how-it-works" className="font-semibold text-white underline underline-offset-2 hover:text-coral">
+                How it works
+              </Link>
             </p>
           )}
           <nav aria-label="Steps" className="mt-6">
@@ -238,9 +243,7 @@ export default function SplitApp() {
         </div>
       </main>
 
-      <footer className="mx-auto mt-14 max-w-6xl px-4 text-[13px] leading-relaxed text-ink-faint sm:px-6">
-        Photos go to OpenAI to be read and are not stored by this app. Share links carry the whole split inside the link, so nothing is saved on a server.
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
