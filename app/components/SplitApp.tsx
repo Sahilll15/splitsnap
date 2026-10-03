@@ -173,6 +173,7 @@ export default function SplitApp() {
             <h1 className="text-[26px] font-bold leading-tight tracking-tight sm:text-[34px]">
               {state.step === 'scan' ? (
                 <>
+                  <span className="sr-only">SplitSnap: </span>
                   Split the bill <span className="text-coral">before the card machine</span> comes back.
                 </>
               ) : (
