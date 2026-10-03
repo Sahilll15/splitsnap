@@ -4,6 +4,5 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: '*', allow: '/', disallow: '/api/' },
     sitemap: 'https://splitsnap-sandy.vercel.app/sitemap.xml',
-    host: 'https://splitsnap-sandy.vercel.app',
   };
 }
