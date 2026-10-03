@@ -33,6 +33,17 @@ All money is integers in the currency's minor unit (cents, pence, whole yen). Fl
 - Rate limit per IP, 4 scans per hour by default. The window starts at your first counted scan and the 429 response says when it resets. Counts live in a shared Upstash Redis database, so they hold across every serverless instance. Each check is one Lua script that increments and sets the expiry atomically, and a scan over the limit is refused without being counted. If Redis is configured but unreachable, the scan route returns 503 rather than letting the request through. Without the Redis env vars (local dev, tests) it counts in memory. The IP comes from `x-real-ip`, then the last `x-forwarded-for` entry, because the leftmost one is set by the client. Addresses are normalized and IPv6 is grouped by /64, so rotating addresses inside one subscriber's range does not get a fresh limit.
 - The SDK retries 429 and 5xx twice with backoff and times out after 60 seconds. `store: false` keeps receipts out of OpenAI's stored responses.
 
+## Architecture
+
+![SplitSnap architecture: the browser shrinks a receipt photo and posts it to one Vercel route, which checks a per IP limit in Upstash Redis and reads the receipt with the OpenAI Responses API, while the maths, the split and the share link run in the browser](docs/architecture.svg)
+
+1. The browser shrinks the photo on a canvas and posts it to `POST /api/scan`.
+2. After the upload checks pass, the route counts the scan against the per IP limit in Upstash Redis.
+3. The route sends the image to the Responses API with a zod schema and gets a typed receipt back.
+4. The browser checks the receipt maths, splits it in integer cents and puts the whole split in the share link's URL hash, so a friend's browser can open it without a server.
+
+**Why it is built this way.** The API key stays on the server and only the scan costs money, so that is the one thing the server does and the one thing it limits. The limit is counted in Redis before the model call, and the split never leaves the browser.
+
 ## Screenshots
 
 ![SplitSnap scan step with the headline "Split the bill before the card machine comes back", an upload area for the receipt photo, and three sample receipts below](docs/home.webp)
