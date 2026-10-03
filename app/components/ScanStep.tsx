@@ -166,7 +166,15 @@ export default function ScanStep({
               className="group flex animate-rise items-center gap-3 rounded-[20px] bg-card p-2.5 text-left ring-1 ring-line transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-18px_rgba(18,24,51,.45)] hover:ring-line-strong disabled:opacity-60 sm:flex-col sm:items-stretch"
             >
               <span className="relative block h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-navy-wash sm:h-36 sm:w-full">
-                <img src={s.image} alt="" className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105" />
+                <img
+                  src={`/samples/thumbs/${s.id}-128.webp`}
+                  srcSet={`/samples/thumbs/${s.id}-128.webp 128w, /samples/thumbs/${s.id}-480.webp 480w`}
+                  sizes="(min-width: 640px) 240px, 64px"
+                  width={128}
+                  height={192}
+                  alt=""
+                  className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105"
+                />
                 {scanning && sampleId === s.id && <span className="absolute inset-0 animate-pulse bg-navy/30" />}
               </span>
               <span className="min-w-0 px-1 sm:pb-1.5">
