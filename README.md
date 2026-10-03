@@ -30,7 +30,7 @@ All money is integers in the currency's minor unit (cents, pence, whole yen). Fl
 - One vision call per scan, `detail: "high"`. A real scan of the samples used about 2,350 input and 250 to 300 output tokens with `gpt-5.4-mini`, a fraction of a cent per receipt.
 - Samples load a saved result from a real scan, so trying the app costs nothing. A "scan it live" link runs the real call.
 - Uploads are checked before anything is counted: content-length cap of 4MB, multipart only, magic-byte sniffing for JPEG, PNG and WebP. Only well-formed requests count against the rate limit.
-- In-memory rate limit per IP (4 scans per hour by default). The IP comes from `x-real-ip`, then the last `x-forwarded-for` entry, because the leftmost one is set by the client.
+- Rate limit per IP, 4 scans per hour by default. The window starts at your first counted scan and the 429 response says when it resets. Counts live in a shared Upstash Redis database, so they hold across every serverless instance. Each check is one Lua script that increments and sets the expiry atomically, and a scan over the limit is refused without being counted. If Redis is configured but unreachable, the scan route returns 503 rather than letting the request through. Without the Redis env vars (local dev, tests) it counts in memory. The IP comes from `x-real-ip`, then the last `x-forwarded-for` entry, because the leftmost one is set by the client. Addresses are normalized and IPv6 is grouped by /64, so rotating addresses inside one subscriber's range does not get a fresh limit.
 - The SDK retries 429 and 5xx twice with backoff and times out after 60 seconds. `store: false` keeps receipts out of OpenAI's stored responses.
 
 ## Screenshots
@@ -53,9 +53,9 @@ A 23 second recording of the full sample flow (scan, check, assign, settle) is i
 
 ```bash
 npm install
-cp .env.example .env.local   # add OPENAI_API_KEY
+cp .env.example .env.local   # add OPENAI_API_KEY (or vercel env pull .env.local)
 npm run dev                  # http://localhost:3203
-npm test                     # 55 unit tests: money parsing, reconciliation, split maths, share links
+npm test                     # 65 unit tests: money parsing, reconciliation, split maths, share links, rate limiter
 npm run lint && npm run build
 ```
 
@@ -66,7 +66,8 @@ npm run lint && npm run build
 | `OPENAI_API_KEY` | none | Server-side key for the vision call |
 | `OPENAI_MODEL` | `gpt-5.4-mini` | Model used to read receipts |
 | `RATE_LIMIT_SCAN` | `4` | Scans allowed per IP per window |
-| `RATE_LIMIT_WINDOW_MS` | `3600000` | Rate limit window |
+| `RATE_LIMIT_WINDOW_MS` | `3600000` | Rate limit window, started by the first counted scan |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | none | Upstash Redis REST credentials for the shared counters. Set by the Vercel integration; without them counts stay in memory |
 
 ## Project layout
 
@@ -76,6 +77,7 @@ npm run lint && npm run build
 - `lib/extraction.ts` the Structured Outputs schema, prompt and normalizer
 - `lib/share.ts` URL encoding of a split
 - `app/api/scan/route.ts` upload checks, rate limit, vision call
+- `app/server/ratelimit.ts` and `app/server/redis.ts` per IP limit counted in Upstash Redis, with an in-memory fallback
 - `public/samples/` three sample receipt photos (rendered from HTML) and their saved scans
 
 ## Related

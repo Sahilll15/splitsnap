@@ -40,8 +40,8 @@ export async function POST(req: Request) {
   if (!mime || !TYPES.has(mime)) return fail('That file is not a JPEG, PNG or WebP image.', 415);
 
   // Only well-formed requests count against the limit.
-  const gate = check(req, 'scan');
-  if (!gate.ok) return tooMany(gate.retryAfter);
+  const gate = await check(req, 'scan');
+  if (!gate.ok) return tooMany(gate);
 
   const started = Date.now();
   try {
