@@ -1,6 +1,6 @@
 import { normalizeExtraction } from '../../../lib/extraction.ts';
 import { check, tooMany } from '../../server/ratelimit.ts';
-import { MODEL, ScanError, scanReceipt } from '../../server/scan.ts';
+import { ScanError, scanReceipt } from '../../server/scan.ts';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -45,14 +45,14 @@ export async function POST(req: Request) {
 
   const started = Date.now();
   try {
-    const { parsed, usage } = await scanReceipt(bytes, mime);
+    const { parsed, model, usage } = await scanReceipt(bytes, mime);
     if (!parsed.is_receipt) return fail('That does not look like a receipt. Try a photo of the whole bill.', 422);
     const receipt = normalizeExtraction(parsed);
     if (receipt.items.length === 0) return fail('No line items found. Try a closer, flatter photo.', 422);
     return Response.json({
       receipt,
       meta: {
-        model: MODEL,
+        model,
         ms: Date.now() - started,
         inputTokens: usage?.input_tokens ?? null,
         outputTokens: usage?.output_tokens ?? null,

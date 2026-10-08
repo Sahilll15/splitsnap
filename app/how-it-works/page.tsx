@@ -134,7 +134,7 @@ export default function HowItWorksPage() {
         <Section id="reading" title="How the receipt is read">
           <p>
             Your browser shrinks the photo on a canvas and posts it to the app&apos;s one server route. The server checks the size and file type, counts the scan
-            against the rate limit, and sends the image to the OpenAI Responses API. The default model is gpt-5.4-mini.
+            against the rate limit, and sends the image to the Groq Responses API (qwen/qwen3.8-27b by default). If Groq is rate limited or down, it tries the OpenAI Responses API once.
           </p>
           <p>
             The model answers in a fixed schema: merchant, date, currency, each line item (name, quantity, unit price, line total), subtotal, tax, whether tax is
@@ -270,7 +270,7 @@ export default function HowItWorksPage() {
                 <li>One route that receives the shrunk photo</li>
                 <li>Size and file type checks</li>
                 <li>The per IP rate limit, counted in Redis</li>
-                <li>The call to OpenAI that reads the receipt, with the API key kept on the server</li>
+                <li>The call to Groq, or OpenAI as a fallback, that reads the receipt, with the API keys kept on the server</li>
               </ul>
             </div>
           </div>
@@ -292,7 +292,7 @@ export default function HowItWorksPage() {
 
         <Section id="privacy" title="Privacy">
           <p>
-            A live scan sends the shrunk photo to this app&apos;s server, which passes it to OpenAI to be read. The request asks OpenAI not to store the response, and
+            A live scan sends the shrunk photo to this app&apos;s server, which passes it to Groq to be read, or to OpenAI if Groq fails. The request asks the provider not to store the response, and
             the server does not save the photo or the result.
           </p>
           <p>
