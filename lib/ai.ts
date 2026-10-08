@@ -2,10 +2,11 @@ import { APIConnectionError } from 'openai';
 
 export const GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
 
-/** Rate limits, server errors and network failures are worth one retry on another provider. */
+/** Rate limits (429, and 413 for one request over Groq's per-minute token budget), server errors
+ *  and network failures are worth one retry on another provider. */
 export function shouldFallback(err: unknown): boolean {
   const status = (err as { status?: unknown } | null)?.status;
-  if (typeof status === 'number') return status === 429 || status >= 500;
+  if (typeof status === 'number') return status === 429 || status === 413 || status >= 500;
   return err instanceof APIConnectionError;
 }
 

@@ -6,9 +6,9 @@ import { shouldFallback, withFallback } from './ai.ts';
 const apiError = (status: number) => APIError.generate(status, { error: { message: 'x' } }, 'x', new Headers());
 const quiet = () => {};
 
-test('falls back on rate limits, server errors and network failures only', () => {
-  for (const s of [429, 500, 502, 503]) assert.equal(shouldFallback(apiError(s)), true, String(s));
-  for (const s of [400, 401, 404, 413, 422]) assert.equal(shouldFallback(apiError(s)), false, String(s));
+test('falls back on rate limits, oversized requests, server errors and network failures only', () => {
+  for (const s of [413, 429, 500, 502, 503]) assert.equal(shouldFallback(apiError(s)), true, String(s));
+  for (const s of [400, 401, 404, 422]) assert.equal(shouldFallback(apiError(s)), false, String(s));
   assert.equal(shouldFallback(new APIConnectionError({ message: 'reset' })), true);
   assert.equal(shouldFallback(new APIConnectionTimeoutError()), true);
   assert.equal(shouldFallback(new Error('bad json')), false);

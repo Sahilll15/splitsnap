@@ -74,7 +74,7 @@ npm run lint && npm run build
 
 | Variable | Default | What it does |
 | --- | --- | --- |
-| `GROQ_API_KEY` | none | Server-side key for the vision call. When set, Groq reads receipts and OpenAI is only tried once if Groq returns 429, a 5xx or a network error |
+| `GROQ_API_KEY` | none | Server-side key for the vision call. When set, Groq reads receipts and OpenAI is only tried once if Groq returns 429, 413 (request over the per-minute token budget), a 5xx or a network error |
 | `GROQ_VISION_MODEL` | `qwen/qwen3.8-27b` | Groq model used to read receipts |
 | `OPENAI_API_KEY` | none | Fallback key, or the only provider when `GROQ_API_KEY` is empty |
 | `OPENAI_MODEL` | `gpt-5.4-mini` | OpenAI model used to read receipts |
