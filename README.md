@@ -12,7 +12,7 @@ Splitting a group bill usually means someone doing receipt maths on a phone calc
 
 ## How it works
 
-1. **Scan.** The photo is shrunk on the device (2000px long edge, JPEG, under 3.5MB) and posted to `/api/scan`. The route calls the OpenAI Responses API with the image as `input_image` and a zod schema through `zodTextFormat`, so Structured Outputs returns typed fields: merchant, date, currency, line items (name, qty, unit price, line total), subtotal, tax, whether tax is already in the prices, tip, service charge, discounts, total and short warnings. The prompt tells the model to transcribe printed numbers as they are and not fix the arithmetic.
+1. **Scan.** The photo is shrunk on the device (2000px long edge, JPEG, under 3.5MB) and posted to `/api/scan`. The route calls the Groq Responses API (OpenAI compatible) with the image as `input_image` and a zod schema through `zodTextFormat`, so Structured Outputs returns typed fields: merchant, date, currency, line items (name, qty, unit price, line total), subtotal, tax, whether tax is already in the prices, tip, service charge, discounts, total and short warnings. The prompt tells the model to transcribe printed numbers as they are and not fix the arithmetic.
 2. **Check.** The app does the maths itself (`lib/receipt.ts`). It checks every line (qty x price against the line total, with a small tolerance for rounded unit prices), items against the subtotal, and subtotal plus charges against the total. A confidence banner shows each check, and any line that does not reconcile is highlighted with a one-tap fix. Nothing is hidden: if the receipt still does not add up, the difference is shown and shared out as its own line.
 3. **Assign.** Add people, pick one, tap what they had. Tapping several people on one dish splits it evenly. Tax, tip, service and discounts can each be split by what people had or evenly.
 4. **Settle.** Per-person totals, who pays whom, and three ways to send it: plain text, a PNG card drawn on a canvas, and a link that carries the whole split in the URL hash (deflate plus base64url). Nothing is stored on a server.
@@ -31,7 +31,7 @@ All money is integers in the currency's minor unit (cents, pence, whole yen). Fl
 - Samples load a saved result from a real scan, so trying the app costs nothing. A "scan it live" link runs the real call.
 - Uploads are checked before anything is counted: content-length cap of 4MB, multipart only, magic-byte sniffing for JPEG, PNG and WebP. Only well-formed requests count against the rate limit.
 - Rate limit per IP, 4 scans per hour by default. The window starts at your first counted scan and the 429 response says when it resets. Counts live in a shared Upstash Redis database, so they hold across every serverless instance. Each check is one Lua script that increments and sets the expiry atomically, and a scan over the limit is refused without being counted. If Redis is configured but unreachable, the scan route returns 503 rather than letting the request through. Without the Redis env vars (local dev, tests) it counts in memory. The IP comes from `x-real-ip`, then the last `x-forwarded-for` entry, because the leftmost one is set by the client. Addresses are normalized and IPv6 is grouped by /64, so rotating addresses inside one subscriber's range does not get a fresh limit.
-- The SDK retries 429 and 5xx twice with backoff and times out after 60 seconds. `store: false` keeps receipts out of OpenAI's stored responses.
+- Groq calls retry once and time out after 25 seconds, so the OpenAI fallback still fits in the function's 60 seconds. OpenAI calls retry 429 and 5xx twice with backoff and time out after 60 seconds. `store: false` asks the provider not to keep receipts.
 
 ## Architecture
 
@@ -55,7 +55,7 @@ A 23 second recording of the full sample flow (scan, check, assign, settle) is i
 ## Stack
 
 - Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4
-- OpenAI Node SDK: Responses API with image input and Structured Outputs (`gpt-5.4-mini`)
+- OpenAI Node SDK pointed at Groq: Responses API with image input and Structured Outputs (`qwen/qwen3.8-27b`, falling back to OpenAI `gpt-5.4-mini`)
 - zod for the receipt schema
 - Integer money maths with BigInt for the largest remainder split, canvas for the share image
 - Deployed on Vercel
@@ -64,9 +64,9 @@ A 23 second recording of the full sample flow (scan, check, assign, settle) is i
 
 ```bash
 npm install
-cp .env.example .env.local   # add OPENAI_API_KEY (or vercel env pull .env.local)
+cp .env.example .env.local   # add GROQ_API_KEY and/or OPENAI_API_KEY (or vercel env pull .env.local)
 npm run dev                  # http://localhost:3203
-npm test                     # 65 unit tests: money parsing, reconciliation, split maths, share links, rate limiter
+npm test                     # 70 unit tests: money parsing, reconciliation, split maths, share links, rate limiter, provider fallback
 npm run lint && npm run build
 ```
 
@@ -74,8 +74,10 @@ npm run lint && npm run build
 
 | Variable | Default | What it does |
 | --- | --- | --- |
-| `OPENAI_API_KEY` | none | Server-side key for the vision call |
-| `OPENAI_MODEL` | `gpt-5.4-mini` | Model used to read receipts |
+| `GROQ_API_KEY` | none | Server-side key for the vision call. When set, Groq reads receipts and OpenAI is only tried once if Groq returns 429, a 5xx or a network error |
+| `GROQ_VISION_MODEL` | `qwen/qwen3.8-27b` | Groq model used to read receipts |
+| `OPENAI_API_KEY` | none | Fallback key, or the only provider when `GROQ_API_KEY` is empty |
+| `OPENAI_MODEL` | `gpt-5.4-mini` | OpenAI model used to read receipts |
 | `RATE_LIMIT_SCAN` | `4` | Scans allowed per IP per window |
 | `RATE_LIMIT_WINDOW_MS` | `3600000` | Rate limit window, started by the first counted scan |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | none | Upstash Redis REST credentials for the shared counters. Set by the Vercel integration; without them counts stay in memory |

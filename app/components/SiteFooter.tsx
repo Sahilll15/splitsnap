@@ -19,7 +19,7 @@ export default function SiteFooter() {
   return (
     <footer className="mx-auto mt-14 max-w-6xl border-t border-line px-4 pt-6 text-[13px] leading-relaxed text-ink-faint sm:px-6">
       <p>
-        Receipt photos go to OpenAI to be read and are not saved by this app. Your split stays in this browser tab, and a share link carries it inside the link itself.
+        Receipt photos go to Groq (or OpenAI as a fallback) to be read and are not saved by this app. Your split stays in this browser tab, and a share link carries it inside the link itself.
       </p>
       <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
         <Link href="/how-it-works" className={link}>
