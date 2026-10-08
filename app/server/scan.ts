@@ -1,19 +1,20 @@
 import OpenAI from 'openai';
 import { zodTextFormat } from 'openai/helpers/zod';
-import { GROQ_BASE_URL, withFallback } from '../../lib/ai.ts';
+import { GROQ_BASE_URL, groqKeys, withFallback, withKeys } from '../../lib/ai.ts';
 import { EXTRACTION_PROMPT, ExtractedReceipt } from '../../lib/extraction.ts';
 
 let openaiClient: OpenAI | null = null;
-let groqClient: OpenAI | null = null;
+const groqClients = new Map<string, OpenAI>();
 function openai() {
   // SDK retries 429 and 5xx with backoff; the timeout keeps a stuck call from holding the function.
   openaiClient ??= new OpenAI({ maxRetries: 2, timeout: 60_000 });
   return openaiClient;
 }
-function groq() {
+function groq(apiKey: string) {
+  let c = groqClients.get(apiKey);
   // Shorter than OpenAI's so a stuck Groq call still leaves time for the fallback inside maxDuration.
-  groqClient ??= new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: GROQ_BASE_URL, maxRetries: 1, timeout: 25_000 });
-  return groqClient;
+  if (!c) groqClients.set(apiKey, (c = new OpenAI({ apiKey, baseURL: GROQ_BASE_URL, maxRetries: 1, timeout: 25_000 })));
+  return c;
 }
 
 export const MODEL = process.env.OPENAI_MODEL || 'gpt-5.4-mini';
@@ -47,8 +48,12 @@ export async function scanReceipt(image: Uint8Array, mime: string) {
     return { response, model };
   };
 
-  const { response, model } = process.env.GROQ_API_KEY
-    ? await withFallback(() => read(groq(), GROQ_VISION_MODEL), process.env.OPENAI_API_KEY ? () => read(openai(), MODEL) : null)
+  const keys = groqKeys();
+  const { response, model } = keys.length
+    ? await withFallback(
+        () => withKeys(keys.map(groq), (client) => read(client, GROQ_VISION_MODEL)),
+        process.env.OPENAI_API_KEY ? () => read(openai(), MODEL) : null,
+      )
     : await read(openai(), MODEL);
 
   if (response.status === 'incomplete') {
